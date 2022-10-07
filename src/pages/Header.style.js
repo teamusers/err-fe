@@ -1,5 +1,5 @@
 import { styled } from "@mui/material/styles";
-import { AppBar, IconButton } from "@mui/material";
+import { AppBar, IconButton, Select } from "@mui/material";
 
 export const NavBar = styled(AppBar)(() => ({
   background:
@@ -11,4 +11,9 @@ export const CustomIconButton = styled(IconButton)(() => ({
   "> svg": {
     marginLeft: 5,
   },
+}));
+
+export const CustomSelect = styled(Select)(() => ({
+  marginRight: "20px",
+  width: "300px",
 }));

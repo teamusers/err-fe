@@ -33,7 +33,7 @@ const CustomTheme = createTheme(theme, {
         "body": {
           background: "white",
           [theme?.breakpoints.up("md")]: {
-            background: "#F5F5F5",
+            background: "#FFF", // F5F5F5
           },
         },
         ".subtitle3": {
@@ -43,7 +43,7 @@ const CustomTheme = createTheme(theme, {
         "html": {
           background: "white",
           [theme?.breakpoints.up("md")]: {
-            background: "#F5F5F5",
+            background: "#FFF", // F5F5F5
           },
         },
         ".text-green": {

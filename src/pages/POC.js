@@ -2,12 +2,10 @@
 import React, { useState, useEffect } from "react";
 import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
-import Paper from "@mui/material/Paper";
+// import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
-import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
-import Select from "@mui/material/Select";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell, { tableCellClasses } from "@mui/material/TableCell";
@@ -20,14 +18,16 @@ import Confetti from "react-confetti";
 // import moment from "moment";
 // import _ from "lodash";
 // import { Header } from "@components";
+import { ReactComponent as DhlLogo } from "@assets/dhl-logo.svg";
+import { Toolbar } from "@mui/material";
+import { NavBar, CustomSelect } from "./Header.style";
 
-const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
-  ...theme.typography.body2,
-  padding: theme.spacing(1),
-  textAlign: "center",
-  color: theme.palette.text.secondary,
-}));
+// const Item = styled(Paper)(({ theme }) => ({
+//   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
+//   ...theme.typography.body2,
+//   padding: theme.spacing(1),
+//   color: theme.palette.text.secondary,
+// }));
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -40,9 +40,10 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
   },
 }));
 
+// eslint-disable-next-line no-unused-vars
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
   "&:nth-of-type(even)": {
-    backgroundColor: theme.palette.action.hover,
+    backgroundColor: "#F8F8F8",
   },
   // hide last border
   "&:last-child td, &:last-child th": {
@@ -135,20 +136,29 @@ const POC = () => {
   //   setFinalDataList(dataRows);
   // };
 
-  useEffect(() => {
-    fetch("http://localhost:3000/v1/parse?kpi=Grade%20of%20Service")
-      // .then((response) => response.json())
+  const fetchData = (KPISelected) => {
+    fetch(`http://localhost:3000/v1/parse?kpi=${KPISelected}`)
+      .then((response) => response.text())
       .then((data) => {
-        console.log("@@@API Response", data.data);
         // setDataList(data.data["Global KPI"]);
-        setDataList(data.data);
+        setDataList(data);
       });
-  }, []);
+  };
+
+  useEffect(() => {
+    fetchData(selectedKPI);
+  }, [selectedKPI]);
 
   useEffect(() => {
     // dataFormatter(dataList, selectedKPI);
-    setFinalDataList(dataList);
-  }, [dataList, selectedKPI]);
+    if (typeof dataList !== "object") {
+      if (dataList !== undefined) {
+        const parseData = JSON.parse(dataList);
+        console.log("Response: ", parseData.data);
+        setFinalDataList(parseData.data);
+      }
+    }
+  }, [dataList]);
 
   const handleChange = (event) => {
     setSelectedKPI(event.target.value);
@@ -161,97 +171,136 @@ const POC = () => {
   return (
     <>
       {isConfettiDisplay && <Confetti width={width} height={height} />}
+      <NavBar>
+        <Toolbar>
+          <Typography variant='h6' noWrap component='div' sx={{ mr: 2, display: "flex" }}>
+            <DhlLogo />
+          </Typography>
+        </Toolbar>
+      </NavBar>
+      <br />
+      <br />
+      <br />
+      <br />
       <Box sx={{ flexGrow: 1 }}>
         <Grid container spacing={3}>
-          <Grid item xs>
-            <Item>
-              {" "}
-              <Box sx={{ minWidth: 120 }}>
-                <FormControl fullWidth>
-                  <InputLabel id='demo-simple-select-label'>KPIs</InputLabel>
-                  <Select
-                    labelId='demo-simple-select-label'
-                    id='demo-simple-select'
-                    value={selectedKPI}
-                    label='KPIs'
-                    onChange={handleChange}
-                  >
-                    {KPIList.map((KPIData) => (
-                      <MenuItem value={KPIData}>{KPIData}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Box>
-              <br />
-              <Box sx={{ minWidth: 120 }}>
-                <FormControl fullWidth>
-                  <InputLabel id='demo-simple-select-label'>Criteria</InputLabel>
-                  <Select
-                    labelId='demo-simple-select-label'
-                    id='demo-simple-select'
-                    value={selectedCriteria}
-                    label='Criteria'
-                    onChange={criteriaHandleChange}
-                  >
-                    {CriteriaList.map((CriteriaData) => (
-                      <MenuItem value={CriteriaData}>{CriteriaData}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Box>
-            </Item>
-          </Grid>
-          <Grid item xs={6}>
-            <Item>
-              <Typography variant='h4' gutterBottom>
-                {selectedKPI}
-              </Typography>
-              <Typography variant='h4' gutterBottom>
-                {selectedCriteria}
-              </Typography>
-              <TableContainer>
-                <Table sx={{ minWidth: 650 }} aria-label='simple table'>
-                  <TableHead>
-                    <TableRow>
-                      <StyledTableCell>Countries</StyledTableCell>
-                      <StyledTableCell align='right'>Past Qtr Avg.</StyledTableCell>
-                      <StyledTableCell align='right'>Current Qtr Avg.</StyledTableCell>
-                      <StyledTableCell align='right'>IPQ</StyledTableCell>
-                      <StyledTableCell align='right'>Points</StyledTableCell>
-                      <StyledTableCell align='right'>Score</StyledTableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {console.log("finalDataList", finalDataList)}
-                    {finalDataList.map((row, i) => (
-                      <StyledTableRow
-                        key={row.country}
-                        sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                      >
-                        <StyledTableCell component='th' scope='row'>
-                          {i + 1}. {row?.country}
-                        </StyledTableCell>
-                        <StyledTableCell align='right'>
-                          {row?.pastQuarterTotalAverage}
-                        </StyledTableCell>
-                        <StyledTableCell align='right'>
-                          {row?.currentQuarterTotalAverage}
-                        </StyledTableCell>
-                        <StyledTableCell align='right'>{row?.IPQ}</StyledTableCell>
-                        <StyledTableCell align='right'>
+          <Grid item xs />
+          <Grid item xs={8}>
+            <Typography variant='h4' gutterBottom>
+              Converter Criteria Computation POC
+            </Typography>
+            <br />
+            {/* <Item> */}
+            <Grid container direction='row' justifyContent='flex-start' alignItems='center'>
+              <Grid item>
+                KPI
+                <Box sx={{ maxWidth: 500 }}>
+                  <FormControl fullWidth>
+                    <CustomSelect
+                      labelId='demo-simple-select-label'
+                      id='demo-simple-select'
+                      value={selectedKPI}
+                      onChange={handleChange}
+                      inputProps={{ "aria-label": "Without label" }}
+                    >
+                      {KPIList.map((KPIData) => (
+                        <MenuItem key={`${KPIData}`} value={KPIData}>
+                          {KPIData}
+                        </MenuItem>
+                      ))}
+                    </CustomSelect>
+                  </FormControl>
+                </Box>
+              </Grid>
+              <Grid item>
+                On Demand Criteria
+                <Box sx={{ maxWidth: 300 }}>
+                  <FormControl fullWidth>
+                    <CustomSelect
+                      labelId='demo-simple-select-label'
+                      id='demo-simple-select'
+                      value={selectedCriteria}
+                      onChange={criteriaHandleChange}
+                      inputProps={{ "aria-label": "Without label" }}
+                    >
+                      {CriteriaList.map((CriteriaData) => (
+                        <MenuItem key={`${CriteriaData}`} value={CriteriaData}>
+                          {CriteriaData}
+                        </MenuItem>
+                      ))}
+                    </CustomSelect>
+                  </FormControl>
+                </Box>
+              </Grid>
+            </Grid>
+            <br />
+            <br />
+            <TableContainer>
+              <Table sx={{ minWidth: 650 }} aria-label='simple table'>
+                <TableHead>
+                  <TableRow>
+                    <StyledTableCell>Country</StyledTableCell>
+                    {selectedCriteria !== "E-T-M" && (
+                      <StyledTableCell>Past Qtr & Yr</StyledTableCell>
+                    )}
+                    {selectedCriteria !== "E-T-M" && (
+                      <StyledTableCell>Current Qtr & Yr</StyledTableCell>
+                    )}
+                    {selectedCriteria !== "E-T-M" && (
+                      <StyledTableCell>Past Qtr Avg</StyledTableCell>
+                    )}
+                    {selectedCriteria !== "E-T-M" && (
+                      <StyledTableCell>Current Qtr Avg</StyledTableCell>
+                    )}
+                    {selectedCriteria !== "E-T-M" && <StyledTableCell>IPQ</StyledTableCell>}
+                    {selectedCriteria !== "IPQ" && <StyledTableCell>Points</StyledTableCell>}
+                    {selectedCriteria === "E-T-M" && <StyledTableCell>Score</StyledTableCell>}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {finalDataList.map((row, i) => (
+                    <StyledTableRow
+                      key={row.country}
+                      sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                    >
+                      <StyledTableCell component='th' scope='row'>
+                        {i + 1}. {row?.country}
+                      </StyledTableCell>
+                      {selectedCriteria !== "E-T-M" && (
+                        <StyledTableCell>{row?.pastQuarter}</StyledTableCell>
+                      )}
+                      {selectedCriteria !== "E-T-M" && (
+                        <StyledTableCell>{row?.currentQuarter}</StyledTableCell>
+                      )}
+                      {selectedCriteria !== "E-T-M" && (
+                        <StyledTableCell>{row?.pastQuarterTotalAverage}</StyledTableCell>
+                      )}
+                      {selectedCriteria !== "E-T-M" && (
+                        <StyledTableCell>{row?.currentQuarterTotalAverage}</StyledTableCell>
+                      )}
+                      {selectedCriteria !== "E-T-M" && (
+                        <StyledTableCell>{row?.IPQ}%</StyledTableCell>
+                      )}
+                      {selectedCriteria !== "IPQ" && (
+                        <StyledTableCell>
                           {selectedCriteria === "E-T-M" ? row?.ETM : row?.ETMvsIPQ}
                         </StyledTableCell>
-                        <StyledTableCell align='right'>{row?.score}</StyledTableCell>
-                      </StyledTableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </Item>
+                      )}
+                      {selectedCriteria === "E-T-M" && (
+                        <StyledTableCell>{row?.score}%</StyledTableCell>
+                      )}
+                    </StyledTableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            {/* </Item> */}
           </Grid>
           <Grid item xs />
         </Grid>
       </Box>
+      <br />
+      <br />
     </>
   );
 };
