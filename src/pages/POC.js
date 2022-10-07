@@ -154,11 +154,20 @@ const POC = () => {
     if (typeof dataList !== "object") {
       if (dataList !== undefined) {
         const parseData = JSON.parse(dataList);
-        console.log("Response: ", parseData.data);
-        setFinalDataList(parseData.data);
+        const parseDataIPQ = JSON.parse(dataList);
+
+        const sortDataETM = parseData.data.sort((a, b) => b.score - a.score);
+        const sortDataIPQ = parseDataIPQ.data.sort((a, b) => b.IPQ - a.IPQ);
+
+        const finalData = selectedCriteria === "E-T-M" ? sortDataETM : sortDataIPQ;
+        setFinalDataList(finalData);
       }
     }
-  }, [dataList]);
+  }, [dataList, selectedCriteria]);
+
+  useEffect(() => {
+    setSelectedCriteria("E-T-M");
+  }, [selectedKPI]);
 
   const handleChange = (event) => {
     setSelectedKPI(event.target.value);
