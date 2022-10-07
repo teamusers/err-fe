@@ -5,6 +5,8 @@ const webpack = require("webpack");
 module.exports = function override(config) {
   alias({
     "@assets": "src/assets/",
+    "@components": "src/components/",
+    "@constants": "src/constants/",
     "@pages": "src/pages/",
   })(config);
 
